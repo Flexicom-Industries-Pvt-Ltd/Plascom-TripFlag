@@ -138,13 +138,35 @@ export default function UploadPage() {
 
         setProgress(`Found ${rows.length} rows with ${columnHeaders.length} columns.`);
       } else if (ext === 'pdf') {
-        setProgress('Converting PDF to image...');
-        const base64 = await convertPdfToBase64(file);
-        
-        setProgress('Extracting data via AI (OCR)...');
-        const { headers, rows: ocrRows } = await doOCR(base64);
-        columnHeaders = headers;
-        rows = ocrRows;
+        setProgress('Extracting text from PDF...');
+        const pdfText = await extractTextFromPdf(file);
+
+        if (pdfText.length > 50) {
+          setProgress('AI is extracting table from text (like a chatbot)...');
+          const res = await fetch('/api/parse-pdf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: pdfText })
+          });
+          
+          if (!res.ok) {
+             const err = await res.json();
+             throw new Error(err.error || 'Failed to extract data via AI');
+          }
+          
+          const result = await res.json();
+          columnHeaders = result.headers;
+          rows = result.rows;
+        } else {
+          // Fallback to OCR if it's an image-based PDF
+          setProgress('Converting scanned PDF to image...');
+          const base64 = await convertPdfToBase64(file);
+          
+          setProgress('Extracting data via AI (OCR)...');
+          const { headers, rows: ocrRows } = await doOCR(base64);
+          columnHeaders = headers;
+          rows = ocrRows;
+        }
         
         if (rows.length === 0) throw new Error('AI could not extract rows from PDF.');
         setProgress(`Extracted ${rows.length} rows from PDF.`);
@@ -303,6 +325,25 @@ function readFileAsBase64(file) {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+}
+
+async function extractTextFromPdf(file) {
+  const pdfjsLib = await import('pdfjs-dist/build/pdf.min.mjs');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  
+  let fullText = '';
+  // Extract text from all pages
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items.map(item => item.str).join(' ');
+    fullText += pageText + '\n';
+  }
+  
+  return fullText.trim();
 }
 
 async function convertPdfToBase64(file) {
