@@ -16,7 +16,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { field_name, operator, value, value_end, severity, label, is_active } = body;
+    const { field_name, operator, value, value_end, unit, severity, label, is_active } = body;
 
     if (!field_name || !operator) {
       return NextResponse.json({ error: 'field_name and operator are required' }, { status: 400 });
@@ -24,8 +24,8 @@ export async function POST(request) {
 
     const sql = getDb();
     const result = await sql`
-      INSERT INTO flagging_rules (field_name, operator, value, value_end, severity, label, is_active)
-      VALUES (${field_name}, ${operator}, ${value || ''}, ${value_end || null}, ${severity || 'warning'}, ${label || null}, ${is_active !== false})
+      INSERT INTO flagging_rules (field_name, operator, value, value_end, unit, severity, label, is_active)
+      VALUES (${field_name}, ${operator}, ${value || ''}, ${value_end || null}, ${unit || null}, ${severity || 'warning'}, ${label || null}, ${is_active !== false})
       RETURNING *
     `;
 
