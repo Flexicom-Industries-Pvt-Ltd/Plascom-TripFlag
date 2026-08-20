@@ -32,7 +32,7 @@ export async function POST(request) {
     }
 
     const completion = await groq.chat.completions.create({
-      model: 'openai/gpt-oss-120b',
+      model: 'qwen/qwen3.6-27b',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         {
@@ -44,8 +44,7 @@ export async function POST(request) {
         }
       ],
       temperature: 0.1,
-      max_tokens: 3000,
-      response_format: { type: 'json_object' }
+      max_tokens: 3000
     });
 
     const text = completion.choices[0]?.message?.content?.trim();
