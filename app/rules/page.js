@@ -21,6 +21,7 @@ export default function RulesPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('chat');
   const [ruleToDelete, setRuleToDelete] = useState(null);
+  const [ruleToEdit, setRuleToEdit] = useState(null);
 
   // Chat state
   const [chatMessages, setChatMessages] = useState([
@@ -176,6 +177,65 @@ export default function RulesPage() {
       fetchRules();
     } catch (err) {
       console.error('Failed to delete rule:', err);
+    }
+  }
+
+  function handleEditClick(rule) {
+    setRuleToEdit({
+      id: rule.id,
+      fieldName: rule.field_name || '',
+      operator: rule.operator || 'equals',
+      value: rule.value || '',
+      valueEnd: rule.value_end || '',
+      unit: rule.unit || '',
+      severity: rule.severity || 'warning',
+      label: rule.label || '',
+      formError: '',
+    });
+  }
+
+  async function handleEditSubmit(e) {
+    e.preventDefault();
+    if (!ruleToEdit.fieldName.trim()) {
+      setRuleToEdit({ ...ruleToEdit, formError: 'Field name is required' });
+      return;
+    }
+
+    const needsVal = !['is_empty', 'is_not_empty'].includes(ruleToEdit.operator);
+    if (needsVal && !ruleToEdit.value.trim()) {
+      setRuleToEdit({ ...ruleToEdit, formError: 'Value is required for this condition' });
+      return;
+    }
+
+    const opLabel = OPERATORS.find(o => o.value === ruleToEdit.operator)?.label || ruleToEdit.operator;
+    const unitStr = ruleToEdit.unit.trim() ? ` ${ruleToEdit.unit.trim()}` : '';
+    const label = `${ruleToEdit.fieldName.trim()} ${opLabel} ${ruleToEdit.value.trim()}${ruleToEdit.valueEnd.trim() ? ` and ${ruleToEdit.valueEnd.trim()}` : ''}${unitStr}`.trim();
+
+    try {
+      const res = await fetch('/api/rules', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: ruleToEdit.id,
+          field_name: ruleToEdit.fieldName.trim(),
+          operator: ruleToEdit.operator,
+          value: ruleToEdit.value.trim(),
+          value_end: ruleToEdit.operator === 'between' ? ruleToEdit.valueEnd.trim() : null,
+          unit: ruleToEdit.unit.trim() || null,
+          severity: ruleToEdit.severity,
+          label,
+        }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to update rule');
+      }
+
+      setRuleToEdit(null);
+      fetchRules();
+    } catch (err) {
+      setRuleToEdit({ ...ruleToEdit, formError: err.message || 'Failed to update rule' });
     }
   }
 
@@ -383,6 +443,15 @@ export default function RulesPage() {
                 </label>
                 <button
                   type="button"
+                  className="btn btn-icon btn-secondary"
+                  onClick={() => handleEditClick(rule)}
+                  title="Edit rule"
+                  style={{ marginRight: '8px' }}
+                >
+                  ✏️
+                </button>
+                <button
+                  type="button"
                   className="btn btn-icon btn-danger"
                   onClick={() => setRuleToDelete(rule.id)}
                   title="Delete rule"
@@ -409,6 +478,100 @@ export default function RulesPage() {
                 🗑 Delete
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Rule Modal */}
+      {ruleToEdit && (
+        <div className="modal-overlay" onClick={() => setRuleToEdit(null)}>
+          <div className="modal" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()}>
+            <h2>Edit Rule</h2>
+            <form onSubmit={handleEditSubmit} style={{ marginTop: 'var(--space-md)' }}>
+              <div className="form-row" style={{ marginBottom: 'var(--space-md)' }}>
+                <div className="input-group">
+                  <label htmlFor="edit-field-name">Field Name</label>
+                  <input
+                    className="input"
+                    id="edit-field-name"
+                    value={ruleToEdit.fieldName}
+                    onChange={e => setRuleToEdit({ ...ruleToEdit, fieldName: e.target.value })}
+                  />
+                </div>
+                <div className="input-group">
+                  <label htmlFor="edit-operator">Condition</label>
+                  <select
+                    className="select"
+                    id="edit-operator"
+                    value={ruleToEdit.operator}
+                    onChange={e => setRuleToEdit({ ...ruleToEdit, operator: e.target.value })}
+                  >
+                    {OPERATORS.map(op => (
+                      <option key={op.value} value={op.value}>{op.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="input-group">
+                  <label htmlFor="edit-severity">Severity</label>
+                  <select
+                    className="select"
+                    id="edit-severity"
+                    value={ruleToEdit.severity}
+                    onChange={e => setRuleToEdit({ ...ruleToEdit, severity: e.target.value })}
+                  >
+                    <option value="warning">⚠️ Warning</option>
+                    <option value="critical">🔴 Critical</option>
+                  </select>
+                </div>
+              </div>
+
+              {!['is_empty', 'is_not_empty'].includes(ruleToEdit.operator) && (
+                <div className="form-row" style={{ marginBottom: 'var(--space-md)' }}>
+                  <div className="input-group">
+                    <label htmlFor="edit-value">Value</label>
+                    <input
+                      className="input"
+                      id="edit-value"
+                      value={ruleToEdit.value}
+                      onChange={e => setRuleToEdit({ ...ruleToEdit, value: e.target.value })}
+                    />
+                  </div>
+                  {ruleToEdit.operator === 'between' && (
+                    <div className="input-group">
+                      <label htmlFor="edit-value-end">End Value</label>
+                      <input
+                        className="input"
+                        id="edit-value-end"
+                        value={ruleToEdit.valueEnd}
+                        onChange={e => setRuleToEdit({ ...ruleToEdit, valueEnd: e.target.value })}
+                      />
+                    </div>
+                  )}
+                  <div className="input-group">
+                    <label htmlFor="edit-unit">Unit (Optional)</label>
+                    <input
+                      className="input"
+                      id="edit-unit"
+                      value={ruleToEdit.unit}
+                      onChange={e => setRuleToEdit({ ...ruleToEdit, unit: e.target.value })}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {ruleToEdit.formError && (
+                <p style={{ color: 'var(--flag-critical)', fontSize: '0.85rem', marginBottom: 'var(--space-md)', fontWeight: 600 }}>
+                  ❌ {ruleToEdit.formError}
+                </p>
+              )}
+
+              <div className="modal-actions">
+                <button type="button" className="btn btn-secondary" onClick={() => setRuleToEdit(null)}>Cancel</button>
+                <button type="submit" className="btn btn-primary">
+                  💾 Save Changes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
