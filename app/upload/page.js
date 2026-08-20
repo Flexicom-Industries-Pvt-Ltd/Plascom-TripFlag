@@ -87,9 +87,19 @@ export default function UploadPage() {
 
         setProgress('Extracting pristine data...');
         
-        if (structure && !structure.fallback && structure.columns && structure.columns.length > 0) {
+        if (structure && !structure.fallback && typeof structure.header_row_index === 'number') {
           // AI successfully mapped the table
-          const { data_start_row, columns } = structure;
+          const { data_start_row, header_row_index } = structure;
+          
+          const headerRowData = rawRows[header_row_index] || [];
+          const columns = [];
+          
+          for (let i = 0; i < headerRowData.length; i++) {
+            const val = headerRowData[i];
+            if (val && typeof val === 'string' && val.trim() !== '' && !val.includes('__EMPTY')) {
+              columns.push({ index: i, name: val.trim() });
+            }
+          }
           
           columnHeaders = columns.map(c => c.name);
           
