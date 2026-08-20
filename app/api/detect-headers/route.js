@@ -8,15 +8,18 @@ I will give you the first 20 rows of an Excel/CSV file represented as a JSON arr
 Many files have meta-information (titles, dates, company names, blank rows) at the top before the actual table data begins.
 Your job is to look at the rows and figure out the exact 0-based index of the row that contains the REAL table headers.
 
-Rules:
+CRITICAL RULES:
 1. Ignore rows that just have 1 or 2 strings (like "Sales Summary", "STORE NAME", or dates).
 2. Ignore rows that are mostly empty.
 3. The true header row ALWAYS has multiple densely packed strings that describe column data (e.g. 'Order No.', 'Date', 'Payment Type', 'Amount').
 4. The true header row is usually immediately followed by data rows.
-5. Output ONLY a valid JSON object with a single key 'header_index' pointing to the 0-based integer index of the header row.
 
-Example Output:
-{"header_index": 3}`;
+Output ONLY valid JSON with this exact structure:
+{
+  "header_index": 3
+}
+
+Output ONLY the JSON object, nothing else. No markdown, no explanation, no conversational text.`;
 
 export async function POST(request) {
   try {
@@ -33,7 +36,7 @@ export async function POST(request) {
         { role: 'user', content: JSON.stringify(rows) },
       ],
       temperature: 0,
-      max_tokens: 50,
+      max_tokens: 150,
       response_format: { type: 'json_object' }
     });
 
