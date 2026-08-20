@@ -35,6 +35,7 @@ export default function RulesPage() {
   const [operator, setOperator] = useState('equals');
   const [value, setValue] = useState('');
   const [valueEnd, setValueEnd] = useState('');
+  const [unit, setUnit] = useState('');
   const [severity, setSeverity] = useState('warning');
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
@@ -117,7 +118,8 @@ export default function RulesPage() {
     }
 
     const opLabel = OPERATORS.find(o => o.value === operator)?.label || operator;
-    const label = `${fieldName.trim()} ${opLabel} ${value.trim()}${valueEnd.trim() ? ` and ${valueEnd.trim()}` : ''}`.trim();
+    const unitStr = unit.trim() ? ` ${unit.trim()}` : '';
+    const label = `${fieldName.trim()} ${opLabel} ${value.trim()}${valueEnd.trim() ? ` and ${valueEnd.trim()}` : ''}${unitStr}`.trim();
 
     try {
       const res = await fetch('/api/rules', {
@@ -128,6 +130,7 @@ export default function RulesPage() {
           operator,
           value: value.trim(),
           value_end: operator === 'between' ? valueEnd.trim() : null,
+          unit: unit.trim() || null,
           severity,
           label,
         }),
@@ -141,6 +144,7 @@ export default function RulesPage() {
       setFieldName('');
       setValue('');
       setValueEnd('');
+      setUnit('');
       setOperator('equals');
       setSeverity('warning');
       setFormSuccess('Rule added successfully!');
@@ -307,7 +311,16 @@ export default function RulesPage() {
                     />
                   </div>
                 )}
-                <div>{/* spacer */}</div>
+                <div className="input-group">
+                  <label htmlFor="rule-unit">Unit (Optional)</label>
+                  <input
+                    className="input"
+                    id="rule-unit"
+                    placeholder="e.g. kg, liters, km"
+                    value={unit}
+                    onChange={e => setUnit(e.target.value)}
+                  />
+                </div>
               </div>
             )}
 
@@ -354,9 +367,9 @@ export default function RulesPage() {
                 {rule.severity === 'critical' ? '🔴' : '⚠️'}
               </div>
               <div className="rule-info">
-                <div className="rule-label">{rule.label || `${rule.field_name} ${rule.operator} ${rule.value}`}</div>
+                <div className="rule-label">{rule.label || `${rule.field_name} ${rule.operator} ${rule.value}${rule.unit ? ` ${rule.unit}` : ''}`}</div>
                 <div className="rule-detail">
-                  Field: <strong>{rule.field_name}</strong> &bull; {OPERATORS.find(o => o.value === rule.operator)?.label || rule.operator} {rule.value}{rule.value_end ? ` – ${rule.value_end}` : ''}
+                  Field: <strong>{rule.field_name}</strong> &bull; {OPERATORS.find(o => o.value === rule.operator)?.label || rule.operator} {rule.value}{rule.value_end ? ` – ${rule.value_end}` : ''}{rule.unit ? ` ${rule.unit}` : ''}
                 </div>
               </div>
               <div className="rule-actions">
