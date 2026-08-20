@@ -64,7 +64,30 @@ export default function UploadPage() {
         const workbook = XLSX.read(data, { type: 'array', cellDates: true });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+        setProgress('🧠 AI is analyzing file structure...');
+        
+        // Extract first 20 rows for AI
+        const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        const sampleRows = rawRows.slice(0, 20);
+        
+        let headerIndex = 0;
+        try {
+          const aiRes = await fetch('/api/detect-headers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rows: sampleRows }),
+          });
+          if (aiRes.ok) {
+            const aiData = await aiRes.json();
+            headerIndex = aiData.header_index || 0;
+          }
+        } catch(e) {
+          console.warn("AI Header detection failed, falling back to 0", e);
+        }
+
+        setProgress('Extracting data...');
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: '', range: headerIndex });
 
         if (jsonData.length === 0) {
           throw new Error('File is empty or has no data rows.');
