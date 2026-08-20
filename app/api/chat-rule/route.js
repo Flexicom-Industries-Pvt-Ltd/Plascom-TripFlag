@@ -26,8 +26,8 @@ export async function POST(request) {
     // Save to database
     const sql = getDb();
     const saved = await sql`
-      INSERT INTO flagging_rules (field_name, operator, value, value_end, severity, label, is_active)
-      VALUES (${rule.field_name}, ${rule.operator}, ${rule.value || ''}, ${rule.value_end || null}, ${rule.severity || 'warning'}, ${rule.label || null}, true)
+      INSERT INTO flagging_rules (field_name, operator, value, value_end, unit, severity, label, is_active)
+      VALUES (${rule.field_name}, ${rule.operator}, ${rule.value || ''}, ${rule.value_end || null}, ${rule.unit || null}, ${rule.severity || 'warning'}, ${rule.label || null}, true)
       RETURNING *
     `;
 
