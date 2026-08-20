@@ -72,3 +72,38 @@ export async function PATCH(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+// PUT fully update a rule
+export async function PUT(request) {
+  try {
+    const body = await request.json();
+    const { id, field_name, operator, value, value_end, unit, severity, label } = body;
+
+    if (!id || !field_name || !operator) {
+      return NextResponse.json({ error: 'id, field_name, and operator are required' }, { status: 400 });
+    }
+
+    const sql = getDb();
+    const result = await sql`
+      UPDATE flagging_rules 
+      SET 
+        field_name = ${field_name}, 
+        operator = ${operator}, 
+        value = ${value || ''}, 
+        value_end = ${value_end || null}, 
+        unit = ${unit || null}, 
+        severity = ${severity || 'warning'}, 
+        label = ${label || null}
+      WHERE id = ${id} 
+      RETURNING *
+    `;
+
+    if (result.length === 0) {
+      return NextResponse.json({ error: 'Rule not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(result[0]);
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
