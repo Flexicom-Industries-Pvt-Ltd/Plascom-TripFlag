@@ -65,46 +65,66 @@ export default function UploadPage() {
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
 
-        setProgress('🧠 AI is analyzing file structure...');
+        setProgress('🧠 AI is mathematically analyzing the grid structure...');
         
-        // Extract first 20 rows for AI
-        const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        const sampleRows = rawRows.slice(0, 20);
+        // Extract raw 2D grid
+        const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+        const sampleRows = rawRows.slice(0, 30);
         
-        let headerIndex = 0;
+        let structure = null;
         try {
-          const aiRes = await fetch('/api/detect-headers', {
+          const aiRes = await fetch('/api/analyze-file-structure', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ rows: sampleRows }),
           });
           if (aiRes.ok) {
-            const aiData = await aiRes.json();
-            headerIndex = aiData.header_index || 0;
+            structure = await aiRes.json();
           }
         } catch(e) {
-          console.warn("AI Header detection failed, falling back to 0", e);
+          console.warn("AI Structure analysis failed", e);
         }
 
-        setProgress('Extracting data...');
-        const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: '', range: headerIndex });
-
-        if (jsonData.length === 0) {
-          throw new Error('File is empty or has no data rows.');
-        }
-
-        columnHeaders = Object.keys(jsonData[0]);
-        rows = jsonData.map(row => {
-          const cleaned = {};
-          for (const key of columnHeaders) {
-            let val = row[key];
-            if (val instanceof Date) {
-              val = val.toISOString().split('T')[0];
+        setProgress('Extracting pristine data...');
+        
+        if (structure && !structure.fallback && structure.columns && structure.columns.length > 0) {
+          // AI successfully mapped the table
+          const { data_start_row, columns } = structure;
+          
+          columnHeaders = columns.map(c => c.name);
+          
+          for (let i = data_start_row; i < rawRows.length; i++) {
+            const rawRow = rawRows[i];
+            
+            // Skip entirely empty rows
+            if (!rawRow || rawRow.every(cell => cell === '' || cell === undefined || cell === null)) continue;
+            
+            const cleanRow = {};
+            for (const col of columns) {
+              let val = rawRow[col.index] || '';
+              if (val instanceof Date) {
+                val = val.toISOString().split('T')[0];
+              }
+              cleanRow[col.name] = val;
             }
-            cleaned[key] = val;
+            rows.push(cleanRow);
           }
-          return cleaned;
-        });
+        } else {
+          // Fallback to standard parser if AI fails or file is already clean
+          const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+          if (jsonData.length === 0) throw new Error('File is empty or has no data rows.');
+          
+          columnHeaders = Object.keys(jsonData[0]);
+          rows = jsonData.map(row => {
+            const cleaned = {};
+            for (const key of columnHeaders) {
+              let val = row[key];
+              if (val instanceof Date) val = val.toISOString().split('T')[0];
+              cleaned[key] = val;
+            }
+            return cleaned;
+          });
+        }
 
         setProgress(`Found ${rows.length} rows with ${columnHeaders.length} columns.`);
       } else if (ext === 'pdf') {
