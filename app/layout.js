@@ -1,6 +1,7 @@
 import './globals.css';
 import Link from 'next/link';
 import ToastProvider from './components/ToastProvider';
+import BackButton from './components/BackButton';
 
 export const metadata = {
   title: 'TripFlag',
@@ -30,7 +31,8 @@ export default function RootLayout({ children }) {
         <ToastProvider />
         <nav className="top-nav">
           <div className="top-nav-content">
-            <span className="top-nav-title">Dashboard</span>
+            <BackButton />
+            <span className="top-nav-title" style={{ flex: 1 }}>Dashboard</span>
             <div className="top-nav-profile">
               <span>Admin</span>
               <div className="avatar">A</div>
