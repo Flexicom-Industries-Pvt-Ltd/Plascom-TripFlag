@@ -10,6 +10,8 @@ export default function HistoryPage() {
   const [editName, setEditName] = useState('');
   const [filter, setFilter] = useState('all');
   const [tripToDelete, setTripToDelete] = useState(null);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -32,6 +34,7 @@ export default function HistoryPage() {
 
   async function handleRename(id) {
     if (!editName.trim()) return;
+    setIsRenaming(true);
     try {
       await fetch(`/api/trips/${id}`, {
         method: 'PUT',
@@ -39,9 +42,11 @@ export default function HistoryPage() {
         body: JSON.stringify({ name: editName.trim() }),
       });
       setEditingId(null);
-      fetchTrips();
+      await fetchTrips();
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsRenaming(false);
     }
   }
 
@@ -51,12 +56,15 @@ export default function HistoryPage() {
 
   async function confirmDelete() {
     if (!tripToDelete) return;
+    setIsDeleting(true);
     try {
       await fetch(`/api/trips/${tripToDelete}`, { method: 'DELETE' });
       setTripToDelete(null);
-      fetchTrips();
+      await fetchTrips();
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -120,8 +128,10 @@ export default function HistoryPage() {
                         }}
                         autoFocus
                       />
-                      <button type="button" className="btn btn-sm btn-primary" onClick={() => handleRename(trip.id)}>Save</button>
-                      <button type="button" className="btn btn-sm btn-secondary" onClick={() => setEditingId(null)}>Cancel</button>
+                      <button type="button" className="btn btn-sm btn-primary" onClick={() => handleRename(trip.id)} disabled={isRenaming}>
+                        {isRenaming ? '⏳ Saving...' : 'Save'}
+                      </button>
+                      <button type="button" className="btn btn-sm btn-secondary" onClick={() => setEditingId(null)} disabled={isRenaming}>Cancel</button>
                     </div>
                   ) : (
                     <div className="trip-name">{trip.name}</div>
@@ -169,9 +179,9 @@ export default function HistoryPage() {
               Are you sure you want to delete this trip? This action cannot be undone.
             </p>
             <div className="modal-actions">
-              <button type="button" className="btn btn-secondary" onClick={() => setTripToDelete(null)}>Cancel</button>
-              <button type="button" className="btn btn-danger" onClick={confirmDelete}>
-                🗑 Delete
+              <button type="button" className="btn btn-secondary" onClick={() => setTripToDelete(null)} disabled={isDeleting}>Cancel</button>
+              <button type="button" className="btn btn-danger" onClick={confirmDelete} disabled={isDeleting}>
+                {isDeleting ? '⏳ Deleting...' : '🗑 Delete'}
               </button>
             </div>
           </div>
