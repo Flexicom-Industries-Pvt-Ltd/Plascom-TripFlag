@@ -25,8 +25,19 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-title" content="TripFlag" />
       </head>
       <body>
+        <nav className="top-nav">
+          <div className="top-nav-content">
+            <span className="top-nav-title">Dashboard</span>
+            <div className="top-nav-profile">
+              <span>Admin</span>
+              <div className="avatar">A</div>
+            </div>
+          </div>
+        </nav>
         <div className="app-container">
-          {children}
+          <div className="page-content">
+            {children}
+          </div>
         </div>
         <nav className="main-nav">
           <div className="nav-brand">

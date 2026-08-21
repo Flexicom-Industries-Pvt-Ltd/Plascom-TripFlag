@@ -906,12 +906,67 @@ html, body {
 
 /* ==================== DESKTOP (wider screens) ==================== */
 
+.top-nav { display: none; }
+.page-content { width: 100%; }
+
 @media (min-width: 768px) {
   body {
+    display: block;
+    background-color: #f8f9fa;
+  }
+
+  .top-nav {
     display: flex;
+    position: fixed;
+    top: 0;
+    left: 240px;
+    right: 0;
+    height: 70px;
+    background: white;
+    border-bottom: 1px solid rgba(226, 228, 234, 0.6);
+    z-index: 100;
+    align-items: center;
+    padding: 0 40px;
+  }
+
+  .top-nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .top-nav-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+  }
+
+  .top-nav-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
   }
 
   .main-nav {
+    position: fixed;
     top: 0;
     bottom: 0;
     right: auto;
@@ -951,10 +1006,18 @@ html, body {
   }
 
   .app-container {
+    margin-top: 70px;
     margin-left: 240px;
-    padding: 48px;
-    padding-bottom: 48px;
+    padding: 40px;
+    width: calc(100% - 240px);
     max-width: none;
+    box-sizing: border-box;
+  }
+
+  .page-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
   }
 
   .review-header-premium {
