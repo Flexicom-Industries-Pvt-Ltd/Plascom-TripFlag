@@ -34,11 +34,19 @@ export default function RootLayout({ children }) {
             <BackButton />
             <span className="top-nav-title" style={{ flex: 1 }}>Dashboard</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <Link href="/logs" title="System Logs" style={{ color: '#64748b', display: 'flex', alignItems: 'center' }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <a 
+                href="https://vercel.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn btn-secondary" 
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.85rem' }}
+                title="System Logs"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                 </svg>
-              </Link>
+                Logs
+              </a>
               <div className="top-nav-profile">
                 <span>Admin</span>
                 <div className="avatar">A</div>
