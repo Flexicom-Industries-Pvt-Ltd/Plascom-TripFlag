@@ -1161,3 +1161,30 @@ html, body {
 
 .error-content h2 { font-weight: 700; font-size: 1.1rem; }
 .error-content p { font-size: 0.85rem; color: var(--text-secondary); }
+
+/* ==================== GLOBAL FOOTER ==================== */
+.global-footer {
+  position: fixed;
+  bottom: 0;
+  left: 240px; /* Adjust for desktop sidebar */
+  right: 0;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(226, 228, 234, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  z-index: 90;
+}
+
+@media (max-width: 768px) {
+  .global-footer {
+    left: 0;
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px)); /* Above mobile nav */
+  }
+}
