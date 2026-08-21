@@ -22,6 +22,9 @@ export default function RulesPage() {
   const [activeTab, setActiveTab] = useState('chat');
   const [ruleToDelete, setRuleToDelete] = useState(null);
   const [ruleToEdit, setRuleToEdit] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Chat state
   const [chatMessages, setChatMessages] = useState([
@@ -122,6 +125,7 @@ export default function RulesPage() {
     const unitStr = unit.trim() ? ` ${unit.trim()}` : '';
     const label = `${fieldName.trim()} ${opLabel} ${value.trim()}${valueEnd.trim() ? ` and ${valueEnd.trim()}` : ''}${unitStr}`.trim();
 
+    setIsSubmitting(true);
     try {
       const res = await fetch('/api/rules', {
         method: 'POST',
@@ -153,6 +157,8 @@ export default function RulesPage() {
       fetchRules();
     } catch (err) {
       setFormError(err.message || 'Failed to create rule');
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -178,18 +184,16 @@ export default function RulesPage() {
   async function confirmDeleteRule() {
     if (!ruleToDelete) return;
     
-    // Optimistic UI update
-    const idToDelete = ruleToDelete;
-    const originalRules = [...rules];
-    setRules(prev => prev.filter(r => r.id !== idToDelete));
-    setRuleToDelete(null);
+    setIsDeleting(true);
 
     try {
-      await fetch(`/api/rules?id=${idToDelete}`, { method: 'DELETE' });
-      fetchRules(); // Ensure sync in background
+      await fetch(`/api/rules?id=${ruleToDelete}`, { method: 'DELETE' });
+      setRuleToDelete(null);
+      await fetchRules();
     } catch (err) {
       console.error('Failed to delete rule:', err);
-      setRules(originalRules); // Revert on failure
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -224,6 +228,7 @@ export default function RulesPage() {
     const unitStr = ruleToEdit.unit.trim() ? ` ${ruleToEdit.unit.trim()}` : '';
     const label = `${ruleToEdit.fieldName.trim()} ${opLabel} ${ruleToEdit.value.trim()}${ruleToEdit.valueEnd.trim() ? ` and ${ruleToEdit.valueEnd.trim()}` : ''}${unitStr}`.trim();
 
+    setIsEditing(true);
     try {
       const res = await fetch('/api/rules', {
         method: 'PUT',
@@ -249,6 +254,8 @@ export default function RulesPage() {
       fetchRules();
     } catch (err) {
       setRuleToEdit({ ...ruleToEdit, formError: err.message || 'Failed to update rule' });
+    } finally {
+      setIsEditing(false);
     }
   }
 
@@ -409,8 +416,8 @@ export default function RulesPage() {
               </p>
             )}
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%' }} id="add-rule-btn">
-              ➕ Add Rule
+            <button type="submit" className="btn btn-primary" style={{ width: '100%' }} id="add-rule-btn" disabled={isSubmitting}>
+              {isSubmitting ? '⏳ Adding Rule...' : '➕ Add Rule'}
             </button>
           </div>
         </form>
@@ -486,9 +493,9 @@ export default function RulesPage() {
               Are you sure you want to delete this rule? It will no longer flag future uploads.
             </p>
             <div className="modal-actions">
-              <button type="button" className="btn btn-secondary" onClick={() => setRuleToDelete(null)}>Cancel</button>
-              <button type="button" className="btn btn-danger" onClick={confirmDeleteRule}>
-                🗑 Delete
+              <button type="button" className="btn btn-secondary" onClick={() => setRuleToDelete(null)} disabled={isDeleting}>Cancel</button>
+              <button type="button" className="btn btn-danger" onClick={confirmDeleteRule} disabled={isDeleting}>
+                {isDeleting ? '⏳ Deleting...' : '🗑 Delete'}
               </button>
             </div>
           </div>
@@ -579,9 +586,9 @@ export default function RulesPage() {
               )}
 
               <div className="modal-actions">
-                <button type="button" className="btn btn-secondary" onClick={() => setRuleToEdit(null)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">
-                  💾 Save Changes
+                <button type="button" className="btn btn-secondary" onClick={() => setRuleToEdit(null)} disabled={isEditing}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={isEditing}>
+                  {isEditing ? '⏳ Saving...' : '💾 Save Changes'}
                 </button>
               </div>
             </form>
