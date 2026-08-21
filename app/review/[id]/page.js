@@ -110,11 +110,22 @@ export default function ReviewPage() {
 
   return (
     <>
-      <div className="page-header" style={{ marginBottom: 'var(--space-xl)' }}>
-        <img src="/Logo.png" alt="TripFlag" className="logo" />
-        <div className="header-text">
+      <div className="review-header-premium">
+        <div className="review-header-info">
           <h1>Review: {trip.name}</h1>
-          <p>{trip.original_filename} • {trip.total_rows} rows</p>
+          <p>📄 {trip.original_filename} &bull; {trip.total_rows} rows &bull; Uploaded {new Date(trip.uploaded_at).toLocaleDateString()}</p>
+        </div>
+        <div className="review-header-actions">
+          {trip.status === 'pending' ? (
+            <>
+              <button className="btn btn-success" onClick={() => setShowNameModal(true)} id="approve-btn">✅ Approve Trip</button>
+              <button className="btn btn-danger" onClick={() => setShowRejectModal(true)} id="reject-btn">❌ Reject Trip</button>
+            </>
+          ) : (
+            <span className={`badge ${trip.status === 'approved' ? 'badge-success' : 'badge-critical'}`} style={{ fontSize: '1rem', padding: '12px 24px', borderRadius: '12px' }}>
+              {trip.status === 'approved' ? '✅ Approved' : '❌ Rejected'}
+            </span>
+          )}
         </div>
       </div>
 
@@ -140,23 +151,7 @@ export default function ReviewPage() {
         </div>
       </div>
 
-      {/* Actions (Moved to Top for Professional UX) */}
-      {trip.status === 'pending' ? (
-        <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-xl)', justifyContent: 'center' }}>
-          <button type="button" className="btn btn-success" onClick={() => setShowNameModal(true)} style={{ flex: 1, padding: '16px' }} id="approve-btn">
-            ✅ Approve Trip
-          </button>
-          <button type="button" className="btn btn-danger" onClick={() => setShowRejectModal(true)} style={{ flex: 1, padding: '16px' }} id="reject-btn">
-            ❌ Reject Trip
-          </button>
-        </div>
-      ) : (
-        <div style={{ textAlign: 'center', marginBottom: 'var(--space-xl)' }}>
-          <span className={`badge ${trip.status === 'approved' ? 'badge-success' : 'badge-critical'}`} style={{ fontSize: '1rem', padding: '12px 24px', borderRadius: 'var(--radius-lg)' }}>
-            {trip.status === 'approved' ? '✅ Approved' : '❌ Rejected'}
-          </span>
-        </div>
-      )}
+
 
       {/* Filters */}
       <div className="tabs" style={{ maxWidth: '360px', marginBottom: 'var(--space-lg)' }}>
