@@ -28,7 +28,7 @@ export default function RootLayout({ children }) {
           {/* Global Top Navbar */}
           <nav className="top-nav">
             <div className="nav-brand">
-              <div className="logo-box">tf</div>
+              <img src="/Logo.png" alt="TripFlag" className="logo-img" />
               <h2>TripFlag Log Center</h2>
               
               <div className="nav-links">

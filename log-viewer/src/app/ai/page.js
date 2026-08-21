@@ -139,17 +139,17 @@ export default function AILogViewer() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
                 <div className="json-section">
                   <label>Messages Payload (Prompt)</label>
-                  <pre style={{ height: '400px', overflowY: 'auto' }}>
+                  <pre style={{ height: '350px' }}>
                     {JSON.stringify(selectedLog.messages_payload, null, 2)}
                   </pre>
                 </div>
 
                 <div className="json-section">
                   <label>Model Response</label>
-                  <pre style={{ height: '400px', overflowY: 'auto' }}>
+                  <pre style={{ height: '350px' }}>
                     {selectedLog.response_payload ? JSON.stringify(selectedLog.response_payload, null, 2) : 'No response body'}
                   </pre>
                 </div>
