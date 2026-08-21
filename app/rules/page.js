@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 
 const OPERATORS = [
   { value: 'equals', label: 'Equals' },
@@ -41,8 +42,6 @@ export default function RulesPage() {
   const [valueEnd, setValueEnd] = useState('');
   const [unit, setUnit] = useState('');
   const [severity, setSeverity] = useState('warning');
-  const [formError, setFormError] = useState('');
-  const [formSuccess, setFormSuccess] = useState('');
 
   useEffect(() => {
     fetchRules();
@@ -107,17 +106,15 @@ export default function RulesPage() {
 
   async function handleFormSubmit(e) {
     e.preventDefault();
-    setFormError('');
-    setFormSuccess('');
 
     if (!fieldName.trim()) {
-      setFormError('Field name is required');
+      toast.error('Field name is required');
       return;
     }
 
     const needsVal = !['is_empty', 'is_not_empty'].includes(operator);
     if (needsVal && !value.trim()) {
-      setFormError('Value is required for this condition');
+      toast.error('Value is required for this condition');
       return;
     }
 
@@ -152,11 +149,10 @@ export default function RulesPage() {
       setUnit('');
       setOperator('equals');
       setSeverity('warning');
-      setFormSuccess('Rule added successfully!');
-      setTimeout(() => setFormSuccess(''), 3000);
+      toast.success('Rule added successfully!');
       fetchRules();
     } catch (err) {
-      setFormError(err.message || 'Failed to create rule');
+      toast.error(err.message || 'Failed to create rule');
     } finally {
       setIsSubmitting(false);
     }
@@ -167,18 +163,23 @@ export default function RulesPage() {
     const originalRules = [...rules];
     setRules(prev => prev.map(r => r.id === id ? { ...r, is_active: !currentActive } : r));
 
-    try {
-      await fetch('/api/rules', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, is_active: !currentActive }),
-      });
-      // We can fetch rules in background to ensure sync, but not blocking UI
-      fetchRules();
-    } catch (err) {
-      console.error('Failed to toggle rule:', err);
+    const togglePromise = fetch('/api/rules', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, is_active: !currentActive }),
+    }).then(async res => {
+      if (!res.ok) throw new Error('Failed to toggle');
+      fetchRules(); // sync in background
+    });
+
+    toast.promise(togglePromise, {
+      loading: 'Updating rule...',
+      success: 'Rule status updated',
+      error: 'Failed to update rule',
+    }).catch(err => {
+      console.error(err);
       setRules(originalRules); // Revert on failure
-    }
+    });
   }
 
   async function confirmDeleteRule() {
@@ -187,11 +188,14 @@ export default function RulesPage() {
     setIsDeleting(true);
 
     try {
-      await fetch(`/api/rules?id=${ruleToDelete}`, { method: 'DELETE' });
+      const res = await fetch(`/api/rules?id=${ruleToDelete}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
       setRuleToDelete(null);
+      toast.success('Rule deleted successfully');
       await fetchRules();
     } catch (err) {
       console.error('Failed to delete rule:', err);
+      toast.error('Failed to delete rule');
     } finally {
       setIsDeleting(false);
     }
@@ -214,13 +218,13 @@ export default function RulesPage() {
   async function handleEditSubmit(e) {
     e.preventDefault();
     if (!ruleToEdit.fieldName.trim()) {
-      setRuleToEdit({ ...ruleToEdit, formError: 'Field name is required' });
+      toast.error('Field name is required');
       return;
     }
 
     const needsVal = !['is_empty', 'is_not_empty'].includes(ruleToEdit.operator);
     if (needsVal && !ruleToEdit.value.trim()) {
-      setRuleToEdit({ ...ruleToEdit, formError: 'Value is required for this condition' });
+      toast.error('Value is required for this condition');
       return;
     }
 
@@ -251,9 +255,10 @@ export default function RulesPage() {
       }
 
       setRuleToEdit(null);
+      toast.success('Rule updated successfully');
       fetchRules();
     } catch (err) {
-      setRuleToEdit({ ...ruleToEdit, formError: err.message || 'Failed to update rule' });
+      toast.error(err.message || 'Failed to update rule');
     } finally {
       setIsEditing(false);
     }
@@ -404,20 +409,10 @@ export default function RulesPage() {
               </div>
             )}
 
-            {formError && (
-              <p style={{ color: 'var(--flag-critical)', fontSize: '0.85rem', marginBottom: 'var(--space-md)', fontWeight: 600 }}>
-                ❌ {formError}
-              </p>
-            )}
-
-            {formSuccess && (
-              <p style={{ color: 'var(--success)', fontSize: '0.85rem', marginBottom: 'var(--space-md)', fontWeight: 600 }}>
-                ✅ {formSuccess}
-              </p>
-            )}
-
             <button type="submit" className="btn btn-primary" style={{ width: '100%' }} id="add-rule-btn" disabled={isSubmitting}>
-              {isSubmitting ? '⏳ Adding Rule...' : '➕ Add Rule'}
+              {isSubmitting ? (
+                <><span className="spinner spinner-sm" style={{ marginRight: '8px' }} /> Adding Rule...</>
+              ) : '➕ Add Rule'}
             </button>
           </div>
         </form>
@@ -430,7 +425,17 @@ export default function RulesPage() {
         </h2>
 
         {loading ? (
-          <div className="loading-overlay"><div className="spinner" /></div>
+          <div className="skeleton-list">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="rule-card" style={{ opacity: 1 }}>
+                <div className="skeleton skeleton-icon" style={{ borderRadius: '50%', width: '40px', height: '40px' }} />
+                <div className="rule-info" style={{ width: '100%' }}>
+                  <div className="skeleton skeleton-text" style={{ width: '30%', marginBottom: '8px' }} />
+                  <div className="skeleton skeleton-text" style={{ width: '60%' }} />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : rules.length === 0 ? (
           <div className="empty-state">
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -495,7 +500,9 @@ export default function RulesPage() {
             <div className="modal-actions">
               <button type="button" className="btn btn-secondary" onClick={() => setRuleToDelete(null)} disabled={isDeleting}>Cancel</button>
               <button type="button" className="btn btn-danger" onClick={confirmDeleteRule} disabled={isDeleting}>
-                {isDeleting ? '⏳ Deleting...' : '🗑 Delete'}
+                {isDeleting ? (
+                  <><span className="spinner spinner-sm" style={{ marginRight: '8px' }} /> Deleting...</>
+                ) : '🗑 Delete'}
               </button>
             </div>
           </div>
@@ -579,16 +586,12 @@ export default function RulesPage() {
                 </div>
               )}
 
-              {ruleToEdit.formError && (
-                <p style={{ color: 'var(--flag-critical)', fontSize: '0.85rem', marginBottom: 'var(--space-md)', fontWeight: 600 }}>
-                  ❌ {ruleToEdit.formError}
-                </p>
-              )}
-
-              <div className="modal-actions">
+              <div className="modal-actions" style={{ marginTop: 'var(--space-xl)' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setRuleToEdit(null)} disabled={isEditing}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={isEditing}>
-                  {isEditing ? '⏳ Saving...' : '💾 Save Changes'}
+                  {isEditing ? (
+                    <><span className="spinner spinner-sm" style={{ marginRight: '8px' }} /> Saving...</>
+                  ) : '💾 Save Changes'}
                 </button>
               </div>
             </form>

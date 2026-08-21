@@ -1,5 +1,6 @@
 import './globals.css';
 import Link from 'next/link';
+import ToastProvider from './components/ToastProvider';
 
 export const metadata = {
   title: 'TripFlag',
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-title" content="TripFlag" />
       </head>
       <body>
+        <ToastProvider />
         <nav className="top-nav">
           <div className="top-nav-content">
             <span className="top-nav-title">Dashboard</span>

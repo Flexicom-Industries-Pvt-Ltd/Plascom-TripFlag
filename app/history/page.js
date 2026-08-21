@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function HistoryPage() {
   const [trips, setTrips] = useState([]);
@@ -41,9 +42,10 @@ export default function HistoryPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: editName.trim() }),
       });
-      setEditingId(null);
+      toast.success('Trip renamed');
       await fetchTrips();
     } catch (err) {
+      toast.error('Failed to rename trip');
       console.error(err);
     } finally {
       setIsRenaming(false);
@@ -60,8 +62,10 @@ export default function HistoryPage() {
     try {
       await fetch(`/api/trips/${tripToDelete}`, { method: 'DELETE' });
       setTripToDelete(null);
+      toast.success('Trip deleted');
       await fetchTrips();
     } catch (err) {
+      toast.error('Failed to delete trip');
       console.error(err);
     } finally {
       setIsDeleting(false);
@@ -102,7 +106,25 @@ export default function HistoryPage() {
       </div>
 
       {loading ? (
-        <div className="loading-overlay" style={{ minHeight: '300px' }}><div className="spinner" /></div>
+        <div className="skeleton-list" style={{ marginTop: 'var(--space-lg)' }}>
+          {[1, 2, 3].map(i => (
+            <div key={i} className="trip-card">
+              <div className="trip-header">
+                <div style={{ flex: 1 }}>
+                  <div className="skeleton skeleton-text" style={{ width: '40%', marginBottom: '8px', height: '18px' }} />
+                  <div className="skeleton skeleton-text" style={{ width: '60%', height: '12px' }} />
+                </div>
+                <div className="skeleton skeleton-text" style={{ width: '80px', height: '24px', borderRadius: '12px' }} />
+              </div>
+              <div className="skeleton skeleton-text" style={{ width: '120px', height: '20px', marginTop: '16px', borderRadius: '12px' }} />
+              <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+                <div className="skeleton skeleton-tab" style={{ width: '60px', height: '30px' }} />
+                <div className="skeleton skeleton-tab" style={{ width: '70px', height: '30px' }} />
+                <div className="skeleton skeleton-tab" style={{ width: '70px', height: '30px' }} />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : filteredTrips.length === 0 ? (
         <div className="empty-state" style={{ marginTop: 'var(--space-2xl)' }}>
           <h3>No trips found</h3>
@@ -129,7 +151,7 @@ export default function HistoryPage() {
                         autoFocus
                       />
                       <button type="button" className="btn btn-sm btn-primary" onClick={() => handleRename(trip.id)} disabled={isRenaming}>
-                        {isRenaming ? '⏳ Saving...' : 'Save'}
+                        {isRenaming ? <><span className="spinner spinner-sm" style={{ marginRight: '4px' }} /> Saving...</> : 'Save'}
                       </button>
                       <button type="button" className="btn btn-sm btn-secondary" onClick={() => setEditingId(null)} disabled={isRenaming}>Cancel</button>
                     </div>
@@ -181,7 +203,7 @@ export default function HistoryPage() {
             <div className="modal-actions">
               <button type="button" className="btn btn-secondary" onClick={() => setTripToDelete(null)} disabled={isDeleting}>Cancel</button>
               <button type="button" className="btn btn-danger" onClick={confirmDelete} disabled={isDeleting}>
-                {isDeleting ? '⏳ Deleting...' : '🗑 Delete'}
+                {isDeleting ? <><span className="spinner spinner-sm" style={{ marginRight: '8px' }} /> Deleting...</> : '🗑 Delete'}
               </button>
             </div>
           </div>

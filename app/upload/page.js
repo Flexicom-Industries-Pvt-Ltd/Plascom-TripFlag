@@ -2,12 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function UploadPage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState('');
-  const [error, setError] = useState('');
   const fileInputRef = useRef(null);
   const router = useRouter();
 
@@ -43,7 +43,6 @@ export default function UploadPage() {
 
   async function processFile(file) {
     setUploading(true);
-    setError('');
     setProgress('Reading file...');
 
     try {
@@ -235,7 +234,7 @@ export default function UploadPage() {
         }
       }
       
-      setError(friendlyError);
+      toast.error(friendlyError);
       setUploading(false);
       setProgress('');
     }
@@ -281,12 +280,6 @@ export default function UploadPage() {
             style={{ display: 'none' }}
             id="file-input"
           />
-
-          {error && (
-            <div className="card" style={{ marginTop: 'var(--space-lg)', borderColor: 'var(--flag-critical-border)', background: 'var(--flag-critical-bg)' }}>
-              <p style={{ color: 'var(--flag-critical)', fontWeight: 600 }}>❌ {error}</p>
-            </div>
-          )}
         </>
       ) : (
         <div className="loading-overlay" style={{ minHeight: '300px' }}>
