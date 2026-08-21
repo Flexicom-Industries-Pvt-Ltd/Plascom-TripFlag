@@ -1,5 +1,7 @@
 import Groq from 'groq-sdk';
 import { NextResponse } from 'next/server';
+import { withLogging } from '../../../lib/logger';
+
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -23,7 +25,7 @@ Guidelines:
 4. If there are no clear headers, invent logical ones based on the data.
 5. Output ONLY a valid JSON object. No markdown blocks, no conversational text.`;
 
-export async function POST(request) {
+async function _POST(request) {
   try {
     const { imageBase64 } = await request.json();
 
@@ -67,3 +69,6 @@ export async function POST(request) {
     return NextResponse.json({ error: error.message || 'Failed to perform OCR' }, { status: 500 });
   }
 }
+
+
+export const POST = withLogging(_POST);

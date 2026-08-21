@@ -1,7 +1,9 @@
 import { getDb } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import { withLogging } from '../../../lib/logger';
 
-export async function GET() {
+
+async function _GET() {
   try {
     const sql = getDb();
     const trips = await sql`SELECT * FROM trips ORDER BY uploaded_at DESC`;
@@ -11,7 +13,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request) {
+async function _POST(request) {
   try {
     const { name, original_filename, file_type, column_headers, rows } = await request.json();
 
@@ -49,3 +51,7 @@ export async function POST(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+
+export const GET = withLogging(_GET);
+export const POST = withLogging(_POST);

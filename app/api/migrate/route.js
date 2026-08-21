@@ -1,7 +1,9 @@
 import { getDb } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import { withLogging } from '../../../lib/logger';
 
-export async function GET() {
+
+async function _GET() {
   try {
     const sql = getDb();
     await sql`ALTER TABLE flagging_rules ADD COLUMN IF NOT EXISTS unit TEXT;`;
@@ -10,3 +12,6 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+
+export const GET = withLogging(_GET);

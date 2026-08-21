@@ -1,8 +1,10 @@
 import { getDb } from '@/lib/db';
 import { runFlagging } from '@/lib/flagger';
 import { NextResponse } from 'next/server';
+import { withLogging } from '../../../lib/logger';
 
-export async function POST(request) {
+
+async function _POST(request) {
   try {
     const { trip_id } = await request.json();
 
@@ -61,3 +63,6 @@ export async function POST(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+
+export const POST = withLogging(_POST);

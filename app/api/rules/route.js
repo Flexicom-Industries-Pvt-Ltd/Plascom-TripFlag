@@ -1,8 +1,10 @@
 import { getDb } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import { withLogging } from '../../../lib/logger';
+
 
 // GET all rules
-export async function GET() {
+async function _GET() {
   try {
     const sql = getDb();
     const rules = await sql`SELECT * FROM flagging_rules ORDER BY created_at DESC`;
@@ -13,7 +15,7 @@ export async function GET() {
 }
 
 // POST create a new rule
-export async function POST(request) {
+async function _POST(request) {
   try {
     const body = await request.json();
     const { field_name, operator, value, value_end, unit, severity, label, is_active } = body;
@@ -36,7 +38,7 @@ export async function POST(request) {
 }
 
 // DELETE a rule by id (passed as query param)
-export async function DELETE(request) {
+async function _DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -54,7 +56,7 @@ export async function DELETE(request) {
 }
 
 // PATCH toggle a rule
-export async function PATCH(request) {
+async function _PATCH(request) {
   try {
     const body = await request.json();
     const { id, is_active } = body;
@@ -74,7 +76,7 @@ export async function PATCH(request) {
 }
 
 // PUT fully update a rule
-export async function PUT(request) {
+async function _PUT(request) {
   try {
     const body = await request.json();
     const { id, field_name, operator, value, value_end, unit, severity, label } = body;
@@ -107,3 +109,10 @@ export async function PUT(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+
+export const GET = withLogging(_GET);
+export const POST = withLogging(_POST);
+export const DELETE = withLogging(_DELETE);
+export const PATCH = withLogging(_PATCH);
+export const PUT = withLogging(_PUT);

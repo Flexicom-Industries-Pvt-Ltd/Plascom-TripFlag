@@ -1,7 +1,9 @@
 import { getDb } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import { withLogging } from '../../../../lib/logger';
 
-export async function GET(request, { params }) {
+
+async function _GET(request, { params }) {
   try {
     const { id } = await params;
     const sql = getDb();
@@ -20,7 +22,7 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function PUT(request, { params }) {
+async function _PUT(request, { params }) {
   try {
     const { id } = await params;
     const body = await request.json();
@@ -46,7 +48,7 @@ export async function PUT(request, { params }) {
   }
 }
 
-export async function DELETE(request, { params }) {
+async function _DELETE(request, { params }) {
   try {
     const { id } = await params;
     const sql = getDb();
@@ -57,3 +59,8 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+
+export const GET = withLogging(_GET);
+export const PUT = withLogging(_PUT);
+export const DELETE = withLogging(_DELETE);
