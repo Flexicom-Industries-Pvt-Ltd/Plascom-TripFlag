@@ -316,8 +316,8 @@ body {
   background: var(--bg-card);
   border-radius: 16px;
   width: 100%;
-  max-width: 800px;
-  max-height: 90vh;
+  max-width: 1200px;
+  max-height: 95vh;
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-modal);

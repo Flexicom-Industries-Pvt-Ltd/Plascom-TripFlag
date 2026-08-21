@@ -176,17 +176,17 @@ export default function LogViewer() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
                 <div className="json-section" style={{ gridColumn: 'span 2' }}>
                   <label>Request Headers</label>
-                  <pre style={{ maxHeight: '200px' }}>{JSON.stringify(selectedLog.request_headers, null, 2)}</pre>
+                  <pre style={{ maxHeight: '250px' }}>{JSON.stringify(selectedLog.request_headers, null, 2)}</pre>
                 </div>
 
                 <div className="json-section">
                   <label>Request Payload</label>
-                  <pre style={{ height: '350px' }}>{selectedLog.request_body ? JSON.stringify(selectedLog.request_body, null, 2) : 'No payload'}</pre>
+                  <pre style={{ height: '500px' }}>{selectedLog.request_body ? JSON.stringify(selectedLog.request_body, null, 2) : 'No payload'}</pre>
                 </div>
 
                 <div className="json-section">
                   <label>Response Payload</label>
-                  <pre style={{ height: '350px' }}>{selectedLog.response_body ? JSON.stringify(selectedLog.response_body, null, 2) : 'No response body'}</pre>
+                  <pre style={{ height: '500px' }}>{selectedLog.response_body ? JSON.stringify(selectedLog.response_body, null, 2) : 'No response body'}</pre>
                 </div>
               </div>
             </div>
