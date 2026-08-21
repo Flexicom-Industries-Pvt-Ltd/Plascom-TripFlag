@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { Camera, Flag, Cpu } from 'lucide-react';
 
 export default function UploadPage() {
   const [isDragOver, setIsDragOver] = useState(false);
@@ -291,17 +292,17 @@ export default function UploadPage() {
       {/* Info cards */}
       <div className="info-grid">
         <div className="info-card">
-          <div className="icon">📸</div>
+          <div className="icon"><Camera size={24} color="var(--primary)" /></div>
           <h3>AI OCR</h3>
           <p>Extracts rows perfectly from images</p>
         </div>
         <div className="info-card">
-          <div className="icon">🚩</div>
+          <div className="icon"><Flag size={24} color="var(--flag-critical)" /></div>
           <h3>Auto-Flag</h3>
           <p>Your rules are applied instantly</p>
         </div>
         <div className="info-card">
-          <div className="icon">🤖</div>
+          <div className="icon"><Cpu size={24} color="var(--accent)" /></div>
           <h3>Smart Match</h3>
           <p>Fuzzy matching for column names</p>
         </div>

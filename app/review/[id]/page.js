@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { CheckCircle2, XCircle, Clock, FileText, AlertTriangle, Check, Save } from 'lucide-react';
 
 export default function ReviewPage() {
   const { id } = useParams();
@@ -113,17 +114,17 @@ export default function ReviewPage() {
       <div className="review-header-premium">
         <div className="review-header-info">
           <h1>Review: {trip.name}</h1>
-          <p>📄 {trip.original_filename} &bull; {trip.total_rows} rows &bull; Uploaded {new Date(trip.uploaded_at).toLocaleDateString()}</p>
+          <p style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FileText size={14} /> {trip.original_filename} &bull; {trip.total_rows} rows &bull; Uploaded {new Date(trip.uploaded_at).toLocaleDateString()}</p>
         </div>
         <div className="review-header-actions">
           {trip.status === 'pending' ? (
             <>
-              <button className="btn btn-success" onClick={() => setShowNameModal(true)} id="approve-btn">✅ Approve Trip</button>
-              <button className="btn btn-danger" onClick={() => setShowRejectModal(true)} id="reject-btn">❌ Reject Trip</button>
+              <button className="btn btn-success" onClick={() => setShowNameModal(true)} id="approve-btn"><CheckCircle2 size={16} /> Approve Trip</button>
+              <button className="btn btn-danger" onClick={() => setShowRejectModal(true)} id="reject-btn"><XCircle size={16} /> Reject Trip</button>
             </>
           ) : (
-            <span className={`badge ${trip.status === 'approved' ? 'badge-success' : 'badge-critical'}`} style={{ fontSize: '1rem', padding: '12px 24px', borderRadius: '12px' }}>
-              {trip.status === 'approved' ? '✅ Approved' : '❌ Rejected'}
+            <span className={`badge ${trip.status === 'approved' ? 'badge-success' : 'badge-critical'}`} style={{ fontSize: '1rem', padding: '12px 24px', borderRadius: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              {trip.status === 'approved' ? <><CheckCircle2 size={16} /> Approved</> : <><XCircle size={16} /> Rejected</>}
             </span>
           )}
         </div>
@@ -144,8 +145,8 @@ export default function ReviewPage() {
           <span className="label">Warnings</span>
         </div>
         <div className="flag-stat" style={{ marginLeft: '0' }}>
-          <span className="number" style={{ color: flaggedCount > 0 ? 'var(--flag-critical)' : 'var(--success)' }}>
-            {flaggedCount > 0 ? `${flaggedCount} flagged` : '✓ Clean'}
+          <span className="number" style={{ color: flaggedCount > 0 ? 'var(--flag-critical)' : 'var(--success)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            {flaggedCount > 0 ? `${flaggedCount} flagged` : <><Check size={24} /> Clean</>}
           </span>
           <span className="label">Status</span>
         </div>
@@ -159,10 +160,10 @@ export default function ReviewPage() {
           All ({rows.length})
         </button>
         <button type="button" className={`tab ${filter === 'flagged' ? 'active' : ''}`} onClick={() => setFilter('flagged')}>
-          🚩 ({flaggedCount})
+          <AlertTriangle size={16} style={{ marginRight: '6px' }} /> ({flaggedCount})
         </button>
         <button type="button" className={`tab ${filter === 'clean' ? 'active' : ''}`} onClick={() => setFilter('clean')}>
-          ✓ ({rows.length - flaggedCount})
+          <Check size={16} style={{ marginRight: '6px' }} /> ({rows.length - flaggedCount})
         </button>
       </div>
 
@@ -205,7 +206,7 @@ export default function ReviewPage() {
                         ))}
                       </div>
                     ) : (
-                      <span className="badge badge-success">✓</span>
+                      <span className="badge badge-success"><Check size={12} /></span>
                     )}
                   </td>
                 </tr>
@@ -238,7 +239,7 @@ export default function ReviewPage() {
             <div className="modal-actions">
               <button type="button" className="btn btn-secondary" onClick={() => setShowNameModal(false)}>Cancel</button>
               <button type="button" className="btn btn-primary" onClick={confirmApprove} disabled={approving || !tripName.trim()} id="confirm-approve-btn">
-                {approving ? 'Saving...' : '✅ Approve & Save'}
+                {approving ? <><span className="spinner spinner-sm" style={{ marginRight: '8px' }} /> Saving...</> : <><Save size={16} /> Approve & Save</>}
               </button>
             </div>
           </div>
@@ -256,7 +257,7 @@ export default function ReviewPage() {
             <div className="modal-actions">
               <button type="button" className="btn btn-secondary" onClick={() => setShowRejectModal(false)}>Cancel</button>
               <button type="button" className="btn btn-danger" onClick={handleReject}>
-                ❌ Confirm Reject
+                <XCircle size={16} /> Confirm Reject
               </button>
             </div>
           </div>

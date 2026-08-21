@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { CheckCircle2, XCircle, Clock, Upload, FileText, Eye, Pencil, Trash2, Check, AlertTriangle } from 'lucide-react';
 
 export default function HistoryPage() {
   const [trips, setTrips] = useState([]);
@@ -95,13 +96,13 @@ export default function HistoryPage() {
           All ({trips.length})
         </button>
         <button type="button" className={`tab ${filter === 'approved' ? 'active' : ''}`} onClick={() => setFilter('approved')}>
-          ✅ Approved
+          <CheckCircle2 size={16} style={{ marginRight: '6px' }} /> Approved
         </button>
         <button type="button" className={`tab ${filter === 'pending' ? 'active' : ''}`} onClick={() => setFilter('pending')}>
-          ⏳ Pending
+          <Clock size={16} style={{ marginRight: '6px' }} /> Pending
         </button>
         <button type="button" className={`tab ${filter === 'rejected' ? 'active' : ''}`} onClick={() => setFilter('rejected')}>
-          ❌ Rejected
+          <XCircle size={16} style={{ marginRight: '6px' }} /> Rejected
         </button>
       </div>
 
@@ -130,7 +131,7 @@ export default function HistoryPage() {
           <h3>No trips found</h3>
           <p>Upload a file to get started.</p>
           <button type="button" className="btn btn-primary" style={{ marginTop: 'var(--space-md)' }} onClick={() => router.push('/upload')}>
-            📤 Upload File
+            <Upload size={16} /> Upload File
           </button>
         </div>
       ) : (
@@ -158,33 +159,33 @@ export default function HistoryPage() {
                   ) : (
                     <div className="trip-name">{trip.name}</div>
                   )}
-                  <div className="trip-meta">
-                    📄 {trip.original_filename} • {trip.total_rows} rows • {new Date(trip.uploaded_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  <div className="trip-meta" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <FileText size={14} /> {trip.original_filename} • {trip.total_rows} rows • {new Date(trip.uploaded_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </div>
                 </div>
-                <span className={`badge ${trip.status === 'approved' ? 'badge-success' : trip.status === 'rejected' ? 'badge-critical' : 'badge-warning'}`}>
-                  {trip.status === 'approved' ? '✅ Approved' : trip.status === 'rejected' ? '❌ Rejected' : '⏳ Pending'}
+                <span className={`badge ${trip.status === 'approved' ? 'badge-success' : trip.status === 'rejected' ? 'badge-critical' : 'badge-warning'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  {trip.status === 'approved' ? <><CheckCircle2 size={14} /> Approved</> : trip.status === 'rejected' ? <><XCircle size={14} /> Rejected</> : <><Clock size={14} /> Pending</>}
                 </span>
               </div>
 
               <div className="trip-flags">
                 {trip.flagged_rows > 0 ? (
-                  <span className="badge badge-critical">🚩 {trip.flagged_rows} flagged</span>
+                  <span className="badge badge-critical" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><AlertTriangle size={12} /> {trip.flagged_rows} flagged</span>
                 ) : (
-                  <span className="badge badge-success">✓ No flags</span>
+                  <span className="badge badge-success" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Check size={12} /> No flags</span>
                 )}
                 <span className="badge badge-neutral">{(trip.file_type || 'xlsx').toUpperCase()}</span>
               </div>
 
               <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-md)', flexWrap: 'wrap' }}>
                 <button type="button" className="btn btn-sm btn-secondary" onClick={() => router.push(`/review/${trip.id}`)}>
-                  👁 View
+                  <Eye size={14} /> View
                 </button>
                 <button type="button" className="btn btn-sm btn-secondary" onClick={() => { setEditingId(trip.id); setEditName(trip.name); }}>
-                  ✏️ Rename
+                  <Pencil size={14} /> Rename
                 </button>
                 <button type="button" className="btn btn-sm btn-danger" onClick={() => handleDeleteClick(trip.id)}>
-                  🗑 Delete
+                  <Trash2 size={14} /> Delete
                 </button>
               </div>
             </div>
@@ -203,7 +204,7 @@ export default function HistoryPage() {
             <div className="modal-actions">
               <button type="button" className="btn btn-secondary" onClick={() => setTripToDelete(null)} disabled={isDeleting}>Cancel</button>
               <button type="button" className="btn btn-danger" onClick={confirmDelete} disabled={isDeleting}>
-                {isDeleting ? <><span className="spinner spinner-sm" style={{ marginRight: '8px' }} /> Deleting...</> : '🗑 Delete'}
+                {isDeleting ? <><span className="spinner spinner-sm" style={{ marginRight: '8px' }} /> Deleting...</> : <><Trash2 size={16} /> Delete</>}
               </button>
             </div>
           </div>

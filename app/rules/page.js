@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
+import { MessageSquare, FileText, AlertTriangle, AlertCircle, Plus, Pencil, Trash2, Save, X } from 'lucide-react';
 
 const OPERATORS = [
   { value: 'equals', label: 'Equals' },
@@ -283,14 +284,14 @@ export default function RulesPage() {
           className={`tab ${activeTab === 'chat' ? 'active' : ''}`}
           onClick={() => setActiveTab('chat')}
         >
-          💬 Chat
+          <MessageSquare size={16} style={{ marginRight: '6px' }} /> Chat
         </button>
         <button
           type="button"
           className={`tab ${activeTab === 'form' ? 'active' : ''}`}
           onClick={() => setActiveTab('form')}
         >
-          📝 Manual
+          <FileText size={16} style={{ marginRight: '6px' }} /> Manual
         </button>
       </div>
 
@@ -366,8 +367,8 @@ export default function RulesPage() {
                   value={severity}
                   onChange={e => setSeverity(e.target.value)}
                 >
-                  <option value="warning">⚠️ Warning</option>
-                  <option value="critical">🔴 Critical</option>
+                  <option value="warning">Warning</option>
+                  <option value="critical">Critical</option>
                 </select>
               </div>
             </div>
@@ -412,7 +413,9 @@ export default function RulesPage() {
             <button type="submit" className="btn btn-primary" style={{ width: '100%' }} id="add-rule-btn" disabled={isSubmitting}>
               {isSubmitting ? (
                 <><span className="spinner spinner-sm" style={{ marginRight: '8px' }} /> Adding Rule...</>
-              ) : '➕ Add Rule'}
+              ) : (
+                <><Plus size={16} /> Add Rule</>
+              )}
             </button>
           </div>
         </form>
@@ -449,7 +452,7 @@ export default function RulesPage() {
           rules.map(rule => (
             <div key={rule.id} className="rule-card" style={{ opacity: rule.is_active ? 1 : 0.5 }}>
               <div className={`rule-icon ${rule.severity}`}>
-                {rule.severity === 'critical' ? '🔴' : '⚠️'}
+                {rule.severity === 'critical' ? <AlertCircle size={24} /> : <AlertTriangle size={24} />}
               </div>
               <div className="rule-info">
                 <div className="rule-label">{rule.label || `${rule.field_name} ${rule.operator} ${rule.value}${rule.unit ? ` ${rule.unit}` : ''}`}</div>
@@ -473,7 +476,7 @@ export default function RulesPage() {
                   title="Edit rule"
                   style={{ marginRight: '8px' }}
                 >
-                  ✏️
+                  <Pencil size={16} />
                 </button>
                 <button
                   type="button"
@@ -481,7 +484,7 @@ export default function RulesPage() {
                   onClick={() => setRuleToDelete(rule.id)}
                   title="Delete rule"
                 >
-                  ✕
+                  <X size={16} />
                 </button>
               </div>
             </div>
@@ -502,7 +505,9 @@ export default function RulesPage() {
               <button type="button" className="btn btn-danger" onClick={confirmDeleteRule} disabled={isDeleting}>
                 {isDeleting ? (
                   <><span className="spinner spinner-sm" style={{ marginRight: '8px' }} /> Deleting...</>
-                ) : '🗑 Delete'}
+                ) : (
+                  <><Trash2 size={16} /> Delete</>
+                )}
               </button>
             </div>
           </div>
@@ -546,8 +551,8 @@ export default function RulesPage() {
                     value={ruleToEdit.severity}
                     onChange={e => setRuleToEdit({ ...ruleToEdit, severity: e.target.value })}
                   >
-                    <option value="warning">⚠️ Warning</option>
-                    <option value="critical">🔴 Critical</option>
+                    <option value="warning">Warning</option>
+                    <option value="critical">Critical</option>
                   </select>
                 </div>
               </div>
@@ -591,7 +596,9 @@ export default function RulesPage() {
                 <button type="submit" className="btn btn-primary" disabled={isEditing}>
                   {isEditing ? (
                     <><span className="spinner spinner-sm" style={{ marginRight: '8px' }} /> Saving...</>
-                  ) : '💾 Save Changes'}
+                  ) : (
+                    <><Save size={16} /> Save Changes</>
+                  )}
                 </button>
               </div>
             </form>
