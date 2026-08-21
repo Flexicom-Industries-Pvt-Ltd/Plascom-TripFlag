@@ -17,6 +17,15 @@ function createWindow() {
 
   // Load the Vercel deployed app
   mainWindow.loadURL('https://tripflag.vercel.app');
+
+  // Hide the "Download Desktop App" button inside the Electron app
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.insertCSS(`
+      a[title="Download Desktop App"] {
+        display: none !important;
+      }
+    `);
+  });
 }
 
 app.whenReady().then(() => {
