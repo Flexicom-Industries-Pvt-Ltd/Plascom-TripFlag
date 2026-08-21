@@ -157,26 +157,39 @@ export default function RulesPage() {
   }
 
   async function toggleRule(id, currentActive) {
+    // Optimistic UI update
+    const originalRules = [...rules];
+    setRules(prev => prev.map(r => r.id === id ? { ...r, is_active: !currentActive } : r));
+
     try {
       await fetch('/api/rules', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, is_active: !currentActive }),
       });
+      // We can fetch rules in background to ensure sync, but not blocking UI
       fetchRules();
     } catch (err) {
       console.error('Failed to toggle rule:', err);
+      setRules(originalRules); // Revert on failure
     }
   }
 
   async function confirmDeleteRule() {
     if (!ruleToDelete) return;
+    
+    // Optimistic UI update
+    const idToDelete = ruleToDelete;
+    const originalRules = [...rules];
+    setRules(prev => prev.filter(r => r.id !== idToDelete));
+    setRuleToDelete(null);
+
     try {
-      await fetch(`/api/rules?id=${ruleToDelete}`, { method: 'DELETE' });
-      setRuleToDelete(null);
-      fetchRules();
+      await fetch(`/api/rules?id=${idToDelete}`, { method: 'DELETE' });
+      fetchRules(); // Ensure sync in background
     } catch (err) {
       console.error('Failed to delete rule:', err);
+      setRules(originalRules); // Revert on failure
     }
   }
 
