@@ -37,10 +37,24 @@ export default function RootLayout({ children }) {
             </div>
           </div>
         </nav>
-        <div className="app-container">
-          <div className="page-content">
+        <div className="app-container" style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 70px)' }}>
+          <div className="page-content" style={{ flex: '1 0 auto' }}>
             {children}
           </div>
+          <footer style={{
+            marginTop: '40px',
+            paddingTop: '20px',
+            borderTop: '1px solid rgba(226, 228, 234, 0.6)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            fontSize: '0.8rem',
+            color: 'var(--text-muted)',
+            flexShrink: 0
+          }}>
+            <div style={{ fontWeight: 500 }}>TripFlag v1.0.1</div>
+            <div>&copy; {new Date().getFullYear()} Plascom Enterprise Pvt Ltd. All rights reserved.</div>
+          </footer>
         </div>
         <nav className="main-nav">
           <div className="nav-brand">
