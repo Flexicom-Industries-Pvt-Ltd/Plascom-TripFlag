@@ -5,7 +5,7 @@ TripFlag is an enterprise-grade automated rule parser and telemetry tracking sys
 ## Deployed Applications
 
 - **Main Application & API:** https://tripflag.vercel.app
-- **Enterprise Log Viewer:** [Insert Log Viewer Vercel URL here]
+- **Enterprise Log Viewer:** https://tripflag-logs.vercel.app
 
 ## System Architecture
 
