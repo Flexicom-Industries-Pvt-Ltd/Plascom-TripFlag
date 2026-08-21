@@ -68,6 +68,14 @@ export default function RootLayout({ children }) {
             </svg>
             History
           </a>
+          <a href="https://github.com/Flexicom-Industries-Pvt-Ltd/Plascom-TripFlag/releases/latest/download/TripFlag.Setup.1.0.0.exe" className="nav-item" style={{ marginTop: 'auto', marginBottom: '1rem', background: '#f8fafc', color: '#0f172a', fontWeight: '600' }} title="Download Desktop App">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Desktop App
+          </a>
         </nav>
         <PWAInstall />
       </body>
