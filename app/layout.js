@@ -76,6 +76,16 @@ export default function RootLayout({ children }) {
             </svg>
             History
           </Link>
+          <Link href="/changelog" className="nav-item" id="nav-changelog">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+            Changelog
+          </Link>
           <div style={{ marginTop: 'auto' }}>
             <a href="https://github.com/Flexicom-Industries-Pvt-Ltd/Plascom-TripFlag/releases/latest/download/TripFlag.Setup.1.0.1.exe" className="nav-item" style={{ marginBottom: '1rem', background: '#f8fafc', color: '#0f172a', fontWeight: '600' }} title="Download Desktop App" id="desktop-download-btn">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

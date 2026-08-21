@@ -8,7 +8,7 @@ export default function BackButton() {
   const pathname = usePathname();
 
   // Don't show on root navigation tabs
-  const isRootLevel = pathname === '/' || pathname === '/history' || pathname === '/upload' || pathname === '/rules';
+  const isRootLevel = pathname === '/' || pathname === '/history' || pathname === '/upload' || pathname === '/rules' || pathname === '/changelog';
 
   if (isRootLevel) {
     return null;
