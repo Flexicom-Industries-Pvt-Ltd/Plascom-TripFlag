@@ -35,7 +35,7 @@ export default function RootLayout({ children }) {
             <span className="top-nav-title" style={{ flex: 1 }}>Dashboard</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <a 
-                href="https://vercel.com" 
+                href="https://tripflag-logs.vercel.app/" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="btn btn-secondary" 
