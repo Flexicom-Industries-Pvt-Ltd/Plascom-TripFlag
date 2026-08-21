@@ -82,8 +82,11 @@ function PWAInstall() {
           let deferredPrompt = null;
           window.addEventListener('beforeinstallprompt', function(e) {
             e.preventDefault();
-            deferredPrompt = e;
-            showInstallBanner();
+            // Only show install prompt on mobile/tablet screens
+            if (window.innerWidth <= 768) {
+              deferredPrompt = e;
+              showInstallBanner();
+            }
           });
 
           function showInstallBanner() {
