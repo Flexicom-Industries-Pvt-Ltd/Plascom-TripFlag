@@ -1,0 +1,25 @@
+[
+  {
+    "version": "v1.0.1",
+    "date": "2026-08-21",
+    "title": "Enterprise UI Overhaul & UX Enhancements",
+    "changes": [
+      { "type": "feat", "text": "Added professional global footer with dynamic licensing information." },
+      { "type": "feat", "text": "Implemented context-aware global Back button for seamless deep-app navigation." },
+      { "type": "style", "text": "Replaced all legacy emojis with enterprise-grade scalable vector icons (Lucide)." },
+      { "type": "style", "text": "Introduced smooth skeleton loaders and graceful degradation for all async data operations." },
+      { "type": "fix", "text": "Resolved download button visibility issues within the Electron desktop wrapper." }
+    ]
+  },
+  {
+    "version": "v1.0.0",
+    "date": "2026-08-18",
+    "title": "Initial System Release",
+    "changes": [
+      { "type": "feat", "text": "Core AI-powered flagging engine released with customizable rulesets." },
+      { "type": "feat", "text": "Desktop application wrapper implemented for native local execution." },
+      { "type": "feat", "text": "Automated PDF and image OCR integration for smart data extraction." },
+      { "type": "feat", "text": "Comprehensive history tracking for approved and rejected trips." }
+    ]
+  }
+]

@@ -1,9 +1,11 @@
 import { parseNaturalLanguageRule } from '@/lib/groq';
 import { getDb } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import { withLogging } from '../../../lib/logger';
+import { validateRule, normalizeRulePayload } from '@/lib/rule-schema';
 
-// POST: Parse natural language into a rule and save it
-export async function POST(request) {
+
+async function _POST(request) {
   try {
     const { message } = await request.json();
 
@@ -11,7 +13,6 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    // Parse with Groq
     const result = await parseNaturalLanguageRule(message);
 
     if (!result.success) {
@@ -21,22 +22,36 @@ export async function POST(request) {
       );
     }
 
-    const rule = result.rule;
+    const normalized = normalizeRulePayload(result.rule);
+    const validation = validateRule(normalized);
 
-    // Save to database
+    if (!validation.valid) {
+      return NextResponse.json(
+        { error: `Rule parsed but invalid: ${validation.errors.join('. ')}`, detail: validation.errors },
+        { status: 422 }
+      );
+    }
+
     const sql = getDb();
     const saved = await sql`
-      INSERT INTO flagging_rules (field_name, operator, value, value_end, unit, severity, label, is_active)
-      VALUES (${rule.field_name}, ${rule.operator}, ${rule.value || ''}, ${rule.value_end || null}, ${rule.unit || null}, ${rule.severity || 'warning'}, ${rule.label || null}, true)
+      INSERT INTO flagging_rules (field_name, semantic_field, field_type, operator, value, value_end, unit, severity, label, is_active)
+      VALUES (
+        ${normalized.field_name}, ${normalized.semantic_field}, ${normalized.field_type},
+        ${normalized.operator}, ${normalized.value}, ${normalized.value_end},
+        ${normalized.unit}, ${normalized.severity}, ${normalized.label}, true
+      )
       RETURNING *
     `;
 
     return NextResponse.json({
       success: true,
-      message: `✅ Rule created: Flag when "${rule.field_name}" ${rule.operator} "${rule.value}"`,
+      message: `✅ Rule created: ${normalized.label}`,
       rule: saved[0],
     });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+
+export const POST = withLogging(_POST);
