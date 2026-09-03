@@ -605,6 +605,17 @@ html, body {
   white-space: nowrap;
 }
 
+.rule-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--bg-input);
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+
 .rule-card .rule-actions {
   display: flex;
   gap: 6px;

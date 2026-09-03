@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { CheckCircle2, XCircle, Clock, FileText, AlertTriangle, Check, Save } from 'lucide-react';
+import { getCellFlagsByField, sortFlagsForDisplay } from '@/lib/flag-display';
 
 export default function ReviewPage() {
   const { id } = useParams();
@@ -100,21 +101,17 @@ export default function ReviewPage() {
     return true;
   });
 
-  function getCellFlags(flagDetails) {
-    const map = {};
-    if (!flagDetails || !Array.isArray(flagDetails)) return map;
-    for (const flag of flagDetails) {
-      map[flag.field] = flag;
-    }
-    return map;
-  }
-
   return (
     <>
       <div className="review-header-premium">
         <div className="review-header-info">
           <h1>Review: {trip.name}</h1>
-          <p style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FileText size={14} /> {trip.original_filename} &bull; {trip.total_rows} rows &bull; Uploaded {new Date(trip.uploaded_at).toLocaleDateString()}</p>
+          <p style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+            <FileText size={14} /> {trip.original_filename} &bull; {trip.total_rows} rows
+            {trip.source_sheet && <> &bull; Sheet: {trip.source_sheet}</>}
+            {trip.format_profile && <> &bull; {trip.format_profile.replace(/_/g, ' ')}</>}
+            &bull; Uploaded {new Date(trip.uploaded_at).toLocaleDateString()}
+          </p>
         </div>
         <div className="review-header-actions">
           {trip.status === 'pending' ? (
@@ -181,7 +178,8 @@ export default function ReviewPage() {
           </thead>
           <tbody>
             {filteredRows.map((row, rowIdx) => {
-              const cellFlags = getCellFlags(row.flag_details);
+              const cellFlags = getCellFlagsByField(row.flag_details);
+              const displayFlags = sortFlagsForDisplay(row.flag_details);
               return (
                 <tr key={row.id || rowIdx}>
                   <td style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{row.row_index + 1}</td>
@@ -199,9 +197,9 @@ export default function ReviewPage() {
                   <td>
                     {row.is_flagged ? (
                       <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                        {(row.flag_details || []).map((f, fi) => (
+                        {displayFlags.map((f, fi) => (
                           <span key={fi} className={`badge ${f.severity === 'critical' ? 'badge-critical' : 'badge-warning'}`} title={f.reason}>
-                            {f.field}
+                            {f.reason || f.field}
                           </span>
                         ))}
                       </div>
