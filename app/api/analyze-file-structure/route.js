@@ -1,5 +1,7 @@
 import Groq from 'groq-sdk';
 import { NextResponse } from 'next/server';
+import { withLogging } from '../../../lib/logger';
+
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -21,7 +23,7 @@ Output ONLY valid JSON with this exact structure:
 
 Output ONLY the JSON object, nothing else. No markdown, no explanation, no conversational text.`;
 
-export async function POST(request) {
+async function _POST(request) {
   try {
     const { rows } = await request.json();
 
@@ -65,3 +67,6 @@ export async function POST(request) {
     });
   }
 }
+
+
+export const POST = withLogging(_POST);
