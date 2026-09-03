@@ -1,9 +1,9 @@
 import { getDb } from '@/lib/db';
 import { NextResponse } from 'next/server';
 import { withLogging } from '../../../lib/logger';
+import { validateRule, normalizeRulePayload } from '@/lib/rule-schema';
 
 
-// GET all rules
 async function _GET() {
   try {
     const sql = getDb();
@@ -14,20 +14,24 @@ async function _GET() {
   }
 }
 
-// POST create a new rule
 async function _POST(request) {
   try {
     const body = await request.json();
-    const { field_name, operator, value, value_end, unit, severity, label, is_active } = body;
+    const normalized = normalizeRulePayload(body);
 
-    if (!field_name || !operator) {
-      return NextResponse.json({ error: 'field_name and operator are required' }, { status: 400 });
+    const validation = validateRule(normalized);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.errors.join('. ') }, { status: 422 });
     }
 
     const sql = getDb();
     const result = await sql`
-      INSERT INTO flagging_rules (field_name, operator, value, value_end, unit, severity, label, is_active)
-      VALUES (${field_name}, ${operator}, ${value || ''}, ${value_end || null}, ${unit || null}, ${severity || 'warning'}, ${label || null}, ${is_active !== false})
+      INSERT INTO flagging_rules (field_name, semantic_field, field_type, operator, value, value_end, unit, severity, label, is_active)
+      VALUES (
+        ${normalized.field_name}, ${normalized.semantic_field}, ${normalized.field_type},
+        ${normalized.operator}, ${normalized.value}, ${normalized.value_end},
+        ${normalized.unit}, ${normalized.severity}, ${normalized.label}, ${normalized.is_active}
+      )
       RETURNING *
     `;
 
@@ -37,7 +41,6 @@ async function _POST(request) {
   }
 }
 
-// DELETE a rule by id (passed as query param)
 async function _DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -55,7 +58,6 @@ async function _DELETE(request) {
   }
 }
 
-// PATCH toggle a rule
 async function _PATCH(request) {
   try {
     const body = await request.json();
@@ -75,28 +77,34 @@ async function _PATCH(request) {
   }
 }
 
-// PUT fully update a rule
 async function _PUT(request) {
   try {
     const body = await request.json();
-    const { id, field_name, operator, value, value_end, unit, severity, label } = body;
 
-    if (!id || !field_name || !operator) {
-      return NextResponse.json({ error: 'id, field_name, and operator are required' }, { status: 400 });
+    if (!body.id) {
+      return NextResponse.json({ error: 'id is required' }, { status: 400 });
+    }
+
+    const normalized = normalizeRulePayload(body);
+    const validation = validateRule(normalized);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.errors.join('. ') }, { status: 422 });
     }
 
     const sql = getDb();
     const result = await sql`
       UPDATE flagging_rules 
       SET 
-        field_name = ${field_name}, 
-        operator = ${operator}, 
-        value = ${value || ''}, 
-        value_end = ${value_end || null}, 
-        unit = ${unit || null}, 
-        severity = ${severity || 'warning'}, 
-        label = ${label || null}
-      WHERE id = ${id} 
+        field_name = ${normalized.field_name}, 
+        semantic_field = ${normalized.semantic_field},
+        field_type = ${normalized.field_type},
+        operator = ${normalized.operator}, 
+        value = ${normalized.value}, 
+        value_end = ${normalized.value_end}, 
+        unit = ${normalized.unit}, 
+        severity = ${normalized.severity}, 
+        label = ${normalized.label}
+      WHERE id = ${body.id} 
       RETURNING *
     `;
 

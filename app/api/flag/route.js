@@ -2,6 +2,9 @@ import { getDb } from '@/lib/db';
 import { runFlagging } from '@/lib/flagger';
 import { NextResponse } from 'next/server';
 import { withLogging } from '../../../lib/logger';
+import { inferColumnTypes } from '@/lib/column-inference';
+import { buildFieldMap } from '@/lib/field-ontology';
+import { normalizeRow } from '@/lib/normalizers/index';
 
 
 async function _POST(request) {
@@ -33,8 +36,28 @@ async function _POST(request) {
     }
 
     const columnHeaders = trip.column_headers || [];
+    let columnTypes = trip.column_types || {};
+    let fieldMap = trip.field_map || {};
+
     const rowsData = rows.map(r => r.row_data);
-    const flaggedData = runFlagging(rowsData, rules, columnHeaders);
+    const needsBackfill = !columnTypes || Object.keys(columnTypes).length === 0
+      || !fieldMap || Object.keys(fieldMap).length === 0;
+
+    if (needsBackfill) {
+      columnTypes = inferColumnTypes(columnHeaders, rowsData.slice(0, 20));
+      ({ fieldMap } = buildFieldMap(columnHeaders, columnTypes));
+      const typesJson = JSON.stringify(columnTypes).replace(/\\u0000/g, '');
+      const mapJson = JSON.stringify(fieldMap).replace(/\\u0000/g, '');
+      await sql`UPDATE trips SET column_types = ${typesJson}::jsonb, field_map = ${mapJson}::jsonb WHERE id = ${trip_id}`;
+    }
+
+    const normalizedRows = rows.map((row) => {
+      const stored = row.normalized_data;
+      if (stored && Object.keys(stored).length > 0 && stored._semantic) return stored;
+      return normalizeRow(row.row_data, columnTypes, fieldMap);
+    });
+
+    const flaggedData = runFlagging(rowsData, rules, columnHeaders, columnTypes, normalizedRows, fieldMap);
 
     let flaggedCount = 0;
     for (let i = 0; i < rows.length; i++) {
@@ -43,9 +66,13 @@ async function _POST(request) {
       if (isFlagged) flaggedCount++;
 
       const flagsJson = JSON.stringify(flags).replace(/\\u0000/g, '');
+      const normalizedJson = JSON.stringify(normalizedRows[i]).replace(/\\u0000/g, '');
+
       await sql`
         UPDATE trip_rows 
-        SET is_flagged = ${isFlagged}, flag_details = ${flagsJson}::jsonb
+        SET is_flagged = ${isFlagged},
+            flag_details = ${flagsJson}::jsonb,
+            normalized_data = ${normalizedJson}::jsonb
         WHERE id = ${rows[i].id}
       `;
     }
@@ -57,6 +84,7 @@ async function _POST(request) {
       total_rows: rows.length,
       flagged_rows: flaggedCount,
       rules_applied: rules.length,
+      field_map: fieldMap,
     });
   } catch (error) {
     console.error('Flag error:', error);
